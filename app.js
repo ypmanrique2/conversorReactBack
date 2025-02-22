@@ -12,9 +12,9 @@ import session from 'express-session';
 
 import dotenv from 'dotenv';
 
-require('dotenv').config();
+dotenv.config();
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 
 // Configuración de CORS
 const corsOptions = {
@@ -59,36 +59,36 @@ const poolAiven = mysql.createPool({
     }
 });
 
-/* // Conexión a MySQL Local (XAMPP)
-const poolLocal = mysql.createPool({
-    host: 'localhost',
-    port: 3306,
-    user: 'root',
-    password: '',
-    database: 'xexpress',
-}); */
+// Conexión a MySQL Local (XAMPP)
+// const poolLocal = mysql.createPool({
+//    host: 'localhost',
+//    port: 3306,
+//    user: 'root',
+//    password: '',
+//    database: 'xexpress',
+// });
 
 poolAiven.getConnection()
     .then(() => console.log("Conexión a Aiven exitosa"))
     .catch(err => console.error("Error al conectar a Aiven:", err.message));
 
-process.on('uncaughtException', err => {
-    console.error('Error crítico:', err);
-});
-process.on('unhandledRejection', err => {
-    console.error('Promesa rechazada sin manejar:', err);
-});
+// process.on('uncaughtException', err => {
+//     console.error('Error crítico:', err);
+// });
+// process.on('unhandledRejection', err => {
+//     console.error('Promesa rechazada sin manejar:', err);
+// });
 
-/* poolLocal.getConnection()
-    .then(() => console.log("Conexión a MySQL local exitosa"))
-    .catch(err => console.error("Error al conectar a MySQL local:", err.message));
+// poolLocal.getConnection()
+//    .then(() => console.log("Conexión a MySQL local exitosa"))
+//    .catch(err => console.error("Error al conectar a MySQL local:", err.message));
 
-process.on('uncaughtException', err => {
-    console.error('Error crítico:', err);
-});
-process.on('unhandledRejection', err => {
-    console.error('Promesa rechazada sin manejar:', err);
-}); */
+// process.on('uncaughtException', err => {
+//    console.error('Error crítico:', err);
+//});
+//process.on('unhandledRejection', err => {
+//    console.error('Promesa rechazada sin manejar:', err);
+//});
 
 // Ruta para registrar un nuevo usuario con clave encriptada en MD5
 app.post('/register', async (req, res) => {
@@ -233,7 +233,6 @@ app.get('/validar', (req, res) => {
 
 // Iniciar el servidor
 app.listen(port, () => {
-
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 
