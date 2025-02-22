@@ -106,7 +106,7 @@ app.post('/register', async (req, res) => {
         const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
 
         await poolAiven.query('INSERT INTO usuarios (usuario, clave, rol) VALUES (?, ?, ?)', [usuario, claveMD5, rolAsignado]);
-        await poolLocal.query('INSERT INTO usuarios (usuario, clave, rol) VALUES (?, ?, ?)', [usuario, claveMD5, rolAsignado]);
+        //await poolLocal.query('INSERT INTO usuarios (usuario, clave, rol) VALUES (?, ?, ?)', [usuario, claveMD5, rolAsignado]);
 
         return res.json({ message: 'Usuario registrado exitosamente' });
     } catch (err) {
@@ -155,7 +155,7 @@ app.put('/usuario/:usuarioId', async (req, res) => {
     try {
         const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
         await poolAiven.query('UPDATE usuarios SET usuario = ?, clave = ? WHERE id = ?', [usuario, claveMD5, usuarioId]);
-        await poolLocal.query('UPDATE usuarios SET usuario = ?, clave = ? WHERE id = ?', [usuario, claveMD5, usuarioId]);
+        //await poolLocal.query('UPDATE usuarios SET usuario = ?, clave = ? WHERE id = ?', [usuario, claveMD5, usuarioId]);
         return res.json({ message: 'Usuario actualizado exitosamente' });
     } catch (err) {
         console.error('Error al actualizar el usuario:', err.message);
@@ -180,7 +180,7 @@ app.put('/usuario/:id/rol', async (req, res) => {
 
     try {
         await poolAiven.query('UPDATE usuarios SET rol = ? WHERE id = ?', [nuevoRol, id]);
-        await poolLocal.query('UPDATE usuarios SET rol = ? WHERE id = ?', [nuevoRol, id]);
+        //await poolLocal.query('UPDATE usuarios SET rol = ? WHERE id = ?', [nuevoRol, id]);
 
         return res.json({ message: 'Rol actualizado exitosamente' });
     } catch (err) {
@@ -214,7 +214,7 @@ app.delete('/user/:usuarioId', async (req, res) => {
 
         // Eliminar el usuario en ambas bases de datos
         await poolAiven.query('DELETE FROM usuarios WHERE id = ?', [usuarioId]);
-        await poolLocal.query('DELETE FROM usuarios WHERE id = ?', [usuarioId]);
+        //await poolLocal.query('DELETE FROM usuarios WHERE id = ?', [usuarioId]);
 
         return res.json({ message: 'Usuario eliminado exitosamente' });
     } catch (err) {
