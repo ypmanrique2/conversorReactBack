@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es-419">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formularios</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+
+<body>
+    <main class="container">
+        <img width="50"
+            src="https://img.freepik.com/vector-gratis/vector-degradado-logotipo-colorido-pajaro_343694-1365.jpg" alt=""
+            srcset="">
+
+        <h1>Formularios</h1>
+
+        <h3>Ingresar</h3>
+        <form action="https://conversor-2wqm28iz7-ypmanrique2s-projects.vercel.app:3000/login" method="GET">
+            <label for="usuarioLogin">Usuario:</label>
+            <input type="text" id="usuarioLogin" name="usuario">
+            <br>
+            <label for="claveLogin">Contraseña:</label>
+            <input type="password" id="claveLogin" name="clave">
+            <br>
+            <input type="submit" value="Login">
+        </form>
+
+        <h3>Registrar</h3>
+        <form action="https://conversor-2wqm28iz7-ypmanrique2s-projects.vercel.app:3000/register" method="POST">
+            <label for="usuarioRegister">Usuario:</label>
+            <input type="text" id="usuarioRegister" name="usuario">
+            <br>
+            <label for="claveRegister">Contraseña:</label>
+            <input type="password" id="claveRegister" name="clave">
+            <br>
+            <input type="submit" value="Registrar">
+        </form>
+    </main>
+</body>
+
+</html>
