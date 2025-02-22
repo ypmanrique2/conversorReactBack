@@ -10,6 +10,9 @@ import crypto from 'crypto';
 
 import session from 'express-session';
 
+import dotenv from 'dotenv';
+
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -46,24 +49,24 @@ const saltRounds = 10;
 
 // Conexión a Aiven
 const poolAiven = mysql.createPool({
-    host: 'mysql-conversor-soy-7596.i.aivencloud.com',
-    port: 12655,
-    user: 'avnadmin',
-    password: 'AVNS_QbjHj-vGWZmBnhv3u0L',
-    database: 'defaultdb',
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     ssl: {
         ca: fs.readFileSync('./ca.pem'),
     }
 });
 
-// Conexión a MySQL Local (XAMPP)
+/* // Conexión a MySQL Local (XAMPP)
 const poolLocal = mysql.createPool({
     host: 'localhost',
     port: 3306,
     user: 'root',
     password: '',
     database: 'xexpress',
-});
+}); */
 
 poolAiven.getConnection()
     .then(() => console.log("Conexión a Aiven exitosa"))
@@ -76,7 +79,7 @@ process.on('unhandledRejection', err => {
     console.error('Promesa rechazada sin manejar:', err);
 });
 
-poolLocal.getConnection()
+/* poolLocal.getConnection()
     .then(() => console.log("Conexión a MySQL local exitosa"))
     .catch(err => console.error("Error al conectar a MySQL local:", err.message));
 
@@ -85,7 +88,7 @@ process.on('uncaughtException', err => {
 });
 process.on('unhandledRejection', err => {
     console.error('Promesa rechazada sin manejar:', err);
-});
+}); */
 
 // Ruta para registrar un nuevo usuario con clave encriptada en MD5
 app.post('/register', async (req, res) => {
@@ -234,4 +237,4 @@ app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 
-export { poolLocal, poolAiven };
+export { poolAiven };
