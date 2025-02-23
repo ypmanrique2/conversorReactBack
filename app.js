@@ -114,6 +114,17 @@ app.post('/login', async (req, res) => {
     }
 });
 
+// Ruta para obtener la lista de usuarios
+app.get('/usuarios', async (req, res) => {
+    try {
+        const [usuarios] = await poolAiven.query('SELECT id, usuario, rol FROM usuarios');
+        res.json(usuarios);
+    } catch (err) {
+        console.error('Error al obtener usuarios:', err.message);
+        res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
+    }
+});
+
 // Verificar rol antes de editar/eliminar
 app.put('/usuario/:usuarioId', async (req, res) => {
     console.log(`Solicitud recibida para actualizar usuario con ID: ${req.params.usuarioId}`);
@@ -148,17 +159,6 @@ app.put('/usuario/:usuarioId', async (req, res) => {
     } catch (err) {
         console.error('Error al actualizar el usuario:', err.message);
         return res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
-    }
-});
-
-// Ruta para obtener la lista de usuarios
-app.get('/usuarios', async (req, res) => {
-    try {
-        const [usuarios] = await poolAiven.query('SELECT id, usuario, rol FROM usuarios');
-        res.json(usuarios);
-    } catch (err) {
-        console.error('Error al obtener usuarios:', err.message);
-        res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
     }
 });
 
