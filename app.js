@@ -226,37 +226,6 @@ app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 
-//JS para manejar el modal
-const confirmModal = document.getElementById("confirmModal");
-const newNameSpan = document.getElementById("nuevoNombre");
-const newRoleSpan = document.getElementById("nuevoRol");
-
-function showConfirmationModal(nombre, rol) {
-    newNameSpan.textContent = nombre;
-    newRoleSpan.textContent = rol;
-    confirmModal.showModal();
-}
-
-document.getElementById("cancelBtn").addEventListener("click", () => {
-    confirmModal.close();
-
-    document.getElementById("confirmBtn").addEventListener("click", () => {
-        function handleEditUser(userId) {
-            const nuevoNombre = document.getElementById(`nombre-${userId}`).value;
-            const nuevoRol = document.getElementById(`rol-${userId}`).value;
-
-            showConfirmationModal(nuevoNombre, nuevoRol, userId);
-        }
-        confirmModal.close();
-        // Agrega un evento al botón "Confirmar" para actualizar al usuario
-        document.getElementById("confirmBtn").onclick = () => {
-            updateUser(userId, nombre, rol);
-            confirmModal.close();
-        };
-    }
-    );
-});
-
 // Ruta para cerrar sesión
 app.post('/logout', (req, res) => {
     req.session.destroy((err) => {
