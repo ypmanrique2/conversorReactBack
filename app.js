@@ -21,7 +21,7 @@ const corsOptions = {
     origin: ['localhost:5173', 'https://vermillion-babka-8fa83b.netlify.app'], // Cambia al puerto correcto de React
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // Necesario para compartir cookies
+    credentials: true, // Habilitar credenciales (cookies, sesiones)
     preflightContinue: false,
     sameSite: 'none',
     optionsSuccessStatus: 204
@@ -37,9 +37,10 @@ app.use(session({
     cookie: {
         sameSite: 'none',
         secure: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production', // Solo en producción
     }
 }));
+
 app.set("trust proxy", 1);
 
 app.use(express.json());  // Para parsear JSON, sino funciona, escriba app.use(express.text());
@@ -85,10 +86,11 @@ app.post('/register', async (req, res) => {
     }
 });
 
+// Ruta login para almacenar el rol en la sesión
 app.post('/login', async (req, res) => {
     console.log("Recibiendo solicitud de login...");
     const { usuario, clave } = req.body;
-    console.log("Datos recibidos:", req.body);
+
     if (!usuario || !clave) {
         return res.status(400).json({ error: 'Usuario y clave son requeridos' });
     }
@@ -96,15 +98,16 @@ app.post('/login', async (req, res) => {
     try {
         const [rows] = await poolAiven.query(
             'SELECT * FROM usuarios WHERE usuario = ?',
-            [usuario],
+            [usuario]
         );
 
         if (rows.length > 0) {
             const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
-            console.log("Comparando:", claveMD5, "con hash:", rows[0].clave);
 
             if (claveMD5 === rows[0].clave) {
-                return res.json({ logueado: true, rol: rows[0].rol }); // Enviar rol al front-end
+                req.session.usuario = usuario;  // Guardar usuario en sesión
+                req.session.rol = rows[0].rol;  // Guardar rol en sesión
+                return res.json({ logueado: true, rol: rows[0].rol });
             }
         }
         return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
@@ -126,7 +129,7 @@ app.get('/usuarios', async (req, res) => {
 });
 
 // Verificar rol antes de editar/eliminar
-app.put('/usuario/:usuarioId', async (req, res) => {
+/* app.put('/usuario/:usuarioId', async (req, res) => {
     console.log(`Solicitud recibida para actualizar usuario con ID: ${req.params.usuarioId}`);
     const { usuarioId } = req.params;
     const { usuario, clave, rol } = req.body;
@@ -141,7 +144,7 @@ app.put('/usuario/:usuarioId', async (req, res) => {
         console.error('Error al actualizar el usuario:', err.message);
         return res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
     }
-});
+}); */
 
 // Ruta para editar un usuario - Solo el administrador puede editar
 app.put('/usuario/:usuarioId', async (req, res) => {
