@@ -12,6 +12,8 @@ import session from 'express-session';
 
 import dotenv from 'dotenv';
 
+import jwt from 'jsonwebtoken';
+
 dotenv.config();
 const app = express();
 const port = process.env.PORT || 10000;
@@ -120,7 +122,7 @@ app.post('/login', async (req, res) => {
 // Ruta para obtener la lista de usuarios
 app.get('/usuarios', async (req, res) => {
     try {
-        const [usuarios] = await poolAiven.query('SELECT id, usuario, rol FROM usuarios');
+        const [usuarios] = await poolAiven.query('SELECT id, nombre, usuario, rol FROM usuarios');
         res.json(usuarios);
     } catch (err) {
         console.error('Error al obtener usuarios:', err.message);
@@ -129,7 +131,7 @@ app.get('/usuarios', async (req, res) => {
 });
 
 // Ruta para actualizar solo el rol de un usuario
-app.put('/usuario/:usuarioId/rol', async (req, res) => {
+/* app.put('/usuario/:usuarioId/rol', async (req, res) => {
     const { usuarioId } = req.params;
     const { rol } = req.body;
 
@@ -144,20 +146,44 @@ app.put('/usuario/:usuarioId/rol', async (req, res) => {
         console.error('Error al actualizar el rol del usuario:', err.message);
         return res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
     }
-});
+}); */
 
 // Ruta para editar un usuario - Solo el administrador puede editar
 app.put('/usuario/:usuarioId', async (req, res) => {
     const { usuarioId } = req.params;
-    const { usuario, clave, rol } = req.body;
+    const { usuario, clave, rol, nombre } = req.body;
 
     if (!req.session || req.session.rol !== 'ADMINISTRADOR') {
         return res.status(403).json({ error: 'No autorizado' });
     }
 
     try {
-        const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
-        await poolAiven.query('UPDATE usuarios SET usuario = ?, clave = ?, rol = ? WHERE id = ?', [usuario, claveMD5, rol, usuarioId]);
+        let query = 'UPDATE usuarios SET ';
+        let params = [];
+
+        if (usuario) {
+            query += 'usuario = ?, ';
+            params.push(usuario);
+        }
+        if (clave) {
+            const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
+            query += 'clave = ?, ';
+            params.push(claveMD5);
+        }
+        if (rol) {
+            query += 'rol = ?, ';
+            params.push(rol);
+        }
+        if (nombre) {
+            query += 'nombre = ?, ';
+            params.push(nombre);
+        }
+
+        query = query.slice(0, -2); // Eliminar la última coma
+        query += ' WHERE id = ?';
+        params.push(usuarioId);
+
+        await poolAiven.query(query, params);
         return res.json({ message: 'Usuario actualizado exitosamente' });
     } catch (err) {
         console.error('Error al actualizar el usuario:', err.message);
@@ -198,6 +224,48 @@ app.get('/validar', (req, res) => {
 // Iniciar el servidor
 app.listen(port, () => {
     console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+
+//JS para manejar el modal
+const confirmModal = document.getElementById("confirmModal");
+const newNameSpan = document.getElementById("nuevoNombre");
+const newRoleSpan = document.getElementById("nuevoRol");
+
+function showConfirmationModal(nombre, rol) {
+    newNameSpan.textContent = nombre;
+    newRoleSpan.textContent = rol;
+    confirmModal.showModal();
+}
+
+document.getElementById("cancelBtn").addEventListener("click", () => {
+    confirmModal.close();
+
+    document.getElementById("confirmBtn").addEventListener("click", () => {
+        function handleEditUser(userId) {
+            const nuevoNombre = document.getElementById(`nombre-${userId}`).value;
+            const nuevoRol = document.getElementById(`rol-${userId}`).value;
+
+            showConfirmationModal(nuevoNombre, nuevoRol, userId);
+        }
+        confirmModal.close();
+        // Agrega un evento al botón "Confirmar" para actualizar al usuario
+        document.getElementById("confirmBtn").onclick = () => {
+            updateUser(userId, nombre, rol);
+            confirmModal.close();
+        };
+    }
+    );
+});
+
+// Ruta para cerrar sesión
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            console.error('Error al cerrar sesión:', err);
+            return res.status(500).json({ error: 'Error al cerrar sesión' });
+        }
+        res.json({ message: 'Sesión cerrada exitosamente' });
+    });
 });
 
 export { poolAiven };
