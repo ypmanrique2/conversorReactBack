@@ -20,7 +20,7 @@ const port = process.env.PORT || 10000;
 
 // Configuración de CORS
 const corsOptions = {
-    origin: ['localhost:5173', 'https://vermillion-babka-8fa83b.netlify.app'], // Cambia al puerto correcto de React
+    origin: ['localhost:5173', 'https://conversor-tts-stt.netlify.app/'], // Cambia al puerto correcto de React
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true, // Habilitar credenciales (cookies, sesiones)
