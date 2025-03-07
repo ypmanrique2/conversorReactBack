@@ -69,7 +69,7 @@ poolAiven.getConnection()
 // Ruta para registrar un nuevo usuario con clave encriptada en MD5
 app.post('/register', async (req, res) => {
     console.log("Recibiendo solicitud de registro...");
-    const { usuario, clave, rol } = req.body;
+    const { usuario, clave, rol, nombre } = req.body;
 
     if (!usuario || !clave) {
         return res.status(400).json({ error: 'Usuario y clave son requeridos' });
@@ -80,7 +80,10 @@ app.post('/register', async (req, res) => {
 
     try {
         const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
-        await poolAiven.query('INSERT INTO usuarios (usuario, clave, rol) VALUES (?, ?, ?)', [usuario, claveMD5, rolAsignado]);
+        await poolAiven.query(
+            'INSERT INTO usuarios (usuario, clave, rol, nombre) VALUES (?, ?, ?, ?)',
+            [usuario, claveMD5, rolAsignado, nombre || '']
+        );
         return res.json({ message: 'Usuario registrado exitosamente' });
     } catch (err) {
         console.error('Error en el registro:', err.message);
@@ -91,9 +94,14 @@ app.post('/register', async (req, res) => {
 // Ruta login para almacenar el rol en la sesión
 app.post('/login', async (req, res) => {
     console.log("Recibiendo solicitud de login...");
+    console.log("Body recibido:", req.body);
+    console.log("Cookies:", req.cookies);
+    console.log("Sesión antes de login:", req.session);
+
     const { usuario, clave } = req.body;
 
     if (!usuario || !clave) {
+        console.log("Faltan datos");
         return res.status(400).json({ error: 'Usuario y clave son requeridos' });
     }
 
@@ -103,12 +111,17 @@ app.post('/login', async (req, res) => {
             [usuario]
         );
 
+        console.log("Resultado de la consulta:", rows);
+
         if (rows.length > 0) {
             const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
 
             if (claveMD5 === rows[0].clave) {
                 req.session.usuario = usuario;  // Guardar usuario en sesión
                 req.session.rol = rows[0].rol;  // Guardar rol en sesión
+
+                console.log("Sesión después de login:", req.session);
+
                 return res.json({ logueado: true, rol: rows[0].rol });
             }
         }
@@ -131,7 +144,7 @@ app.get('/usuarios', async (req, res) => {
 });
 
 // Ruta para actualizar solo el rol de un usuario
-/* app.put('/usuario/:usuarioId/rol', async (req, res) => {
+app.put('/usuario/:usuarioId/rol', async (req, res) => {
     const { usuarioId } = req.params;
     const { rol } = req.body;
 
@@ -146,7 +159,7 @@ app.get('/usuarios', async (req, res) => {
         console.error('Error al actualizar el rol del usuario:', err.message);
         return res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
     }
-}); */
+});
 
 // Ruta para editar un usuario - Solo el administrador puede editar
 app.put('/usuario/:usuarioId', async (req, res) => {
