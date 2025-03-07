@@ -128,23 +128,23 @@ app.get('/usuarios', async (req, res) => {
     }
 });
 
-// Verificar rol antes de editar/eliminar
-/* app.put('/usuario/:usuarioId', async (req, res) => {
-    console.log(`Solicitud recibida para actualizar usuario con ID: ${req.params.usuarioId}`);
+// Ruta para actualizar solo el rol de un usuario
+app.put('/usuario/:usuarioId/rol', async (req, res) => {
     const { usuarioId } = req.params;
-    const { usuario, clave, rol } = req.body;
-    if (rol !== 'ADMINISTRADOR') {
+    const { rol } = req.body;
+
+    if (!req.session || req.session.rol !== 'ADMINISTRADOR') {
         return res.status(403).json({ error: 'No autorizado' });
     }
+
     try {
-        const claveMD5 = crypto.createHash('md5').update(clave).digest('hex');
-        await poolAiven.query('UPDATE usuarios SET usuario = ?, clave = ? WHERE id = ?', [usuario, claveMD5, usuarioId]);
-        return res.json({ message: 'Usuario actualizado exitosamente' });
+        await poolAiven.query('UPDATE usuarios SET rol = ? WHERE id = ?', [rol, usuarioId]);
+        return res.json({ message: 'Rol actualizado exitosamente' });
     } catch (err) {
-        console.error('Error al actualizar el usuario:', err.message);
+        console.error('Error al actualizar el rol del usuario:', err.message);
         return res.status(500).json({ error: 'Error en la base de datos: ' + err.message });
     }
-}); */
+});
 
 // Ruta para editar un usuario - Solo el administrador puede editar
 app.put('/usuario/:usuarioId', async (req, res) => {
